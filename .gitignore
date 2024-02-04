@@ -1,0 +1,16 @@
+
+*.DAT
+AUDIO/PAD
+*.PAK
+*.raw
+.vscode/settings.json
+.vscode/launch.json
+.vscode/c_cpp_properties.json
+*.exe
+*.dll
+*.vag
+*.wav
+vgmstream-win/COPYING
+vgmstream-win/USAGE.md
+vgmstream-win/README.md
+sfx
