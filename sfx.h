@@ -82,7 +82,7 @@ uint32_t calculateBufferSize(BankHeader *bankHeader, uint32_t bankAudioSize, int
 
 void load_package_titles(GenericList* list);
 void load_bank_lookup(GenericList* list);
-void load_bank_data(GenericList* bank_headers, GenericList* bank_data, const char* path, GenericList* curr_pack);
+void load_bank_data(GenericList* bank_headers, GenericList* bank_data, const char* fname, GenericList* curr_pack);
 
 void unload_generic_list(GenericList* list);
 void unload_generic_list_nested(GenericList* list, int levels);

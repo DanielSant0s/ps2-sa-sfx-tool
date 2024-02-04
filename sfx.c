@@ -49,7 +49,11 @@ void load_package_titles(GenericList* list) {
 void load_bank_lookup(GenericList* list) {
     FILE* f = NULL;
 
-    f = fopen("AUDIO/CONFIG/BANKLKUP.DAT", "rb");
+    f = fopen("BANKLKUP.DAT", "rb");
+    if (!f) {
+        f = fopen("AUDIO/CONFIG/BANKLKUP.DAT", "rb");
+    }
+    
 
     fseek(f, 0, SEEK_END);
 
@@ -83,9 +87,18 @@ void unload_generic_list_nested(GenericList* list, int levels) {
     free(list->data);
 }
 
-void load_bank_data(GenericList* bank_headers, GenericList* bank_data, const char* path, GenericList* curr_pack) {
+void load_bank_data(GenericList* bank_headers, GenericList* bank_data, const char* fname, GenericList* curr_pack) {
     uint8_t* pack_data = NULL;
-    FILE *f = fopen(path, "rb");
+    char path[512] = { 0 };
+
+    FILE *f = NULL;
+    f = fopen(fname, "rb");
+    if (!f) {
+        
+        strcat(path, "AUDIO/SFX/");
+        strcat(path, fname);
+        f = fopen(path, "rb");
+    }
 
     fseek(f, 0, SEEK_END);
 

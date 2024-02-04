@@ -13,7 +13,7 @@
 
 char cwd[1024];
 
-const char* SFX_PATH = "AUDIO/SFX/";
+static const char* SFX_PATH = "AUDIO/SFX/";
 
 const uint8_t padding[sizeof(BankHeader)] = { 0 };
 
@@ -123,7 +123,7 @@ int main(int argc, char *argv[]) {
     strcat(path, SFX_PATH);
     strcat(path, fname);
 
-    if (!fexists(path)) {
+    if (!fexists(fname) && !fexists(path) ) {
         printf("ERROR: The specified file doesn't exist!\n");
         return 0;
     }
@@ -159,7 +159,7 @@ int main(int argc, char *argv[]) {
     GenericList bank_headers = { NULL, 0 };
     GenericList bank_data = { NULL, 0 };
 
-    load_bank_data(&bank_headers, &bank_data, path, &pak_meta);
+    load_bank_data(&bank_headers, &bank_data, fname, &pak_meta);
 
     printf("%s %s, please wait!\n", mode? "Packing" : "Unpacking", fname);
 
@@ -330,14 +330,17 @@ int main(int argc, char *argv[]) {
         {
             char bank_path[512] = { 0 };
             char wav_path[512] = { 0 };
+            char line_buf[256] = { 0 };
             char call_path[1024] = { 0 };
             char ext_path[64] = { 0 };
+            char extracted_path[64] = { 0 };
             uint8_t* sound_ptr = NULL;
 
             memset(path, 0, 512);
 
             sprintf(path, "%s_wav", tmp_titles[sfxPackIndex]);
             sprintf(ext_path, "%s_vag", tmp_titles[sfxPackIndex]);
+            sprintf(extracted_path, "%s_extracted", tmp_titles[sfxPackIndex]);
             create_folder(ext_path);
 
             BankHeader* headers = bank_headers.data;
@@ -346,6 +349,9 @@ int main(int argc, char *argv[]) {
             _getcwd(cwd, 1024);
 
             for (i = 0; i < bank_headers.size; i++) {
+                sprintf(bank_path, "%s\\bank_%03d\\sfx_meta.dat", extracted_path, i+1);
+                FILE* fmeta = fopen(bank_path, "r");
+
                 sprintf(wav_path, "%s\\bank_%03d", path, i+1);
                 sprintf(bank_path, "%s\\bank_%03d", ext_path, i+1);
                 create_folder(bank_path);
@@ -356,10 +362,24 @@ int main(int argc, char *argv[]) {
                     sprintf(bank_path, "%s\\%s\\bank_%03d\\sound_%03d.vag", cwd, ext_path, i+1, j+1);
                     sprintf(wav_path, "%s\\%s\\bank_%03d\\sound_%03d.wav", cwd, path, i+1, j+1);
 
-                    sprintf(call_path, "wav2vag.exe %s %s", wav_path, bank_path);
+                    fgets(line_buf, 256, fmeta);
+
+                    int32_t loop = -1;
+                    uint16_t rate = 0;
+                    int16_t headroom = 0;
+                    
+                    sscanf(line_buf, "%d %hd %hd\n", &loop, &rate, &headroom);
+                    if (loop != -1) {
+                        sprintf(call_path, "wav2vag.exe %s %s -l:%d", wav_path, bank_path, loop);
+                    } else {
+                        sprintf(call_path, "wav2vag.exe %s %s", wav_path, bank_path);
+                    }
+
+                    
 
                     system(call_path);
                 }
+                fclose(fmeta);
             }
         }
         break;
